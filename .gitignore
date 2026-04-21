@@ -1,0 +1,13 @@
+backend/vendor/
+backend/.env.local
+backend/config/jwt/private.pem
+backend/var/
+
+frontend-admin/node_modules/
+frontend-admin/.next/
+frontend-admin/.env.local
+
+mobile_prestataire/.dart_tool/
+mobile_prestataire/build/
+mobile_client/.dart_tool/
+mobile_client/build/
