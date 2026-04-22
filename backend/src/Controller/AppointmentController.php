@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Entity\Appointment;
 use App\Repository\AppointmentRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,7 +33,45 @@ class AppointmentController extends AbstractController
         $em->flush();
         return $this->json(['status' => $appt->getStatus()]);
     }
+    // POST /api/appointments — client crée une demande de RDV
+    #[Route('/appointments', methods: ['POST'])]
+    #[IsGranted('ROLE_CLIENT')]
+    public function create(
+        Request $req,
+        EntityManagerInterface $em,
+        UserRepository $userRepo
+    ): JsonResponse {
+        $data = json_decode($req->getContent(), true);
 
+        $provider = $userRepo->find($data['provider_id']);
+        if (!$provider) {
+            return $this->json(['error' => 'Prestataire introuvable'], 404);
+        }
+
+        $service = $em->getRepository(\App\Entity\Service::class)
+                    ->find($data['service_id']);
+        if (!$service) {
+            return $this->json(['error' => 'Service introuvable'], 404);
+        }
+
+    $appt = new Appointment();
+    $appt->setClient($this->getUser());
+    $appt->setProvider($provider);
+    $appt->setService($service);
+    $appt->setScheduledAt(new \DateTime($data['scheduled_at']));
+    $appt->setDescription($data['description'] ?? null);
+    $appt->setBudget($data['budget'] ?? null);
+    $appt->setStatus(Appointment::STATUS_PENDING);
+
+    $em->persist($appt);
+    $em->flush();
+
+    return $this->json([
+        'message' => 'Demande envoyée',
+        'id'      => $appt->getId(),
+        'status'  => $appt->getStatus(),
+    ], 201);
+    }
     #[Route('/appointments/{id}/refuse', methods: ['PATCH'])]
     #[IsGranted('ROLE_PRESTATAIRE')]
     public function refuse(Appointment $appt, Request $req, EntityManagerInterface $em): JsonResponse
