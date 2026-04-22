@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'screens/register_screen.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/services_screen.dart';
+import 'screens/agenda_screen.dart';
+import 'screens/gps_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/stats_screen.dart';
 import 'services/api_service.dart';
 
 void main() async {
@@ -24,6 +29,11 @@ class ServicyApp extends StatelessWidget {
       routes: {
         '/register':  (_) => const RegisterScreen(),
         '/dashboard': (_) => const DashboardScreen(),
+        '/services':  (_) => const ServicesScreen(),
+        '/agenda':    (_) => const AgendaScreen(),
+        '/gps':       (_) => const GpsScreen(),
+        '/profile':   (_) => const ProfileScreen(),
+        '/stats':     (_) => const StatsScreen(),
       },
     );
   }

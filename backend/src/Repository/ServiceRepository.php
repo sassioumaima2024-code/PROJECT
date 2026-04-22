@@ -1,14 +1,10 @@
 <?php
-
 namespace App\Repository;
 
 use App\Entity\Service;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Service>
- */
 class ServiceRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,28 +12,34 @@ class ServiceRepository extends ServiceEntityRepository
         parent::__construct($registry, Service::class);
     }
 
-    //    /**
-    //     * @return Service[] Returns an array of Service objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findWithFilters(array $filters): array
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->where('s.isActive = true');
 
-    //    public function findOneBySomeField($value): ?Service
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if (!empty($filters['category'])) {
+            $qb->andWhere('s.category = :category')
+               ->setParameter('category', $filters['category']);
+        }
+
+        if (!empty($filters['price_min'])) {
+            $qb->andWhere('s.priceMin >= :priceMin')
+               ->setParameter('priceMin', $filters['price_min']);
+        }
+
+        if (!empty($filters['price_max'])) {
+            $qb->andWhere('s.priceMax <= :priceMax')
+               ->setParameter('priceMax', $filters['price_max']);
+        }
+
+        if (!empty($filters['rating'])) {
+            $qb->andWhere('s.averageRating >= :rating')
+               ->setParameter('rating', $filters['rating']);
+        }
+
+        return $qb->orderBy('s.averageRating', 'DESC')
+                  ->setMaxResults(20)
+                  ->getQuery()
+                  ->getResult();
+    }
 }
