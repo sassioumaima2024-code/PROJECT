@@ -34,6 +34,39 @@ class LocationController extends AbstractController
         $radius = $req->query->get('radius', 10);
 
         $providers = $repo->findNearby($lat, $lng, $radius);
-        return $this->json($providers);
+        return $this->json(['data' => $providers]);
+    }
+
+    #[Route('/location/eta/{appId}', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function eta(int $appId, EntityManagerInterface $em): JsonResponse
+    {
+        $appointment = $em->getRepository(\App\Entity\Appointment::class)->find($appId);
+        if (!$appointment) {
+            return $this->json(['error' => 'RDV introuvable'], 404);
+        }
+
+        return $this->json([
+            'appointmentId' => $appId,
+            'etaMinutes' => 15,
+            'source' => 'local_estimate',
+        ]);
+    }
+
+    #[Route('/location/{userId}', methods: ['GET'], requirements: ['userId' => '\d+'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function getLocation(int $userId, UserRepository $repo): JsonResponse
+    {
+        $user = $repo->find($userId);
+        if (!$user) {
+            return $this->json(['error' => 'Utilisateur introuvable'], 404);
+        }
+
+        return $this->json([
+            'userId' => $user->getId(),
+            'latitude' => $user->getLatitude(),
+            'longitude' => $user->getLongitude(),
+            'isAvailableNow' => $user->isAvailableNow(),
+        ]);
     }
 }

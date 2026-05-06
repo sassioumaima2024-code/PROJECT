@@ -16,7 +16,7 @@ class Review
     private User $provider;
 
     #[ORM\ManyToOne(targetEntity: Appointment::class)]
-    private Appointment $appointment;
+    private ?Appointment $appointment = null;
 
     #[ORM\Column(type: 'integer')]
     private int $rating; // 1-5
@@ -33,8 +33,8 @@ class Review
     public function setClient(User $u): self { $this->client = $u; return $this; }
     public function getProvider(): User { return $this->provider; }
     public function setProvider(User $u): self { $this->provider = $u; return $this; }
-    public function getAppointment(): Appointment { return $this->appointment; }
-    public function setAppointment(Appointment $a): self { $this->appointment = $a; return $this; }
+    public function getAppointment(): ?Appointment { return $this->appointment; }
+    public function setAppointment(?Appointment $a): self { $this->appointment = $a; return $this; }
     public function getRating(): int { return $this->rating; }
     public function setRating(int $r): self { $this->rating = $r; return $this; }
     public function getComment(): ?string { return $this->comment; }

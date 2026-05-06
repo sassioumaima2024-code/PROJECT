@@ -13,6 +13,23 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/api')]
 class ServiceController extends AbstractController
 {
+    private function serializeService(Service $service): array
+    {
+        return [
+            'id' => $service->getId(),
+            'title' => $service->getTitle(),
+            'category' => $service->getCategory(),
+            'priceMin' => $service->getPriceMin(),
+            'priceMax' => $service->getPriceMax(),
+            'experience' => $service->getExperience(),
+            'description' => $service->getDescription(),
+            'governorates' => $service->getGovernorates(),
+            'photos' => $service->getPhotos(),
+            'isActive' => $service->isActive(),
+            'averageRating' => $service->getAverageRating(),
+        ];
+    }
+
     #[Route('/services', methods: ['GET'])]
     public function index(Request $req, ServiceRepository $repo): JsonResponse
     {
@@ -24,7 +41,21 @@ class ServiceController extends AbstractController
             'rating'    => $req->query->get('rating'),
         ];
         $services = $repo->findWithFilters($filters);
-        return $this->json($services, 200, [], ['groups' => 'service:read']);
+        return $this->json(['data' => array_map(fn(Service $s) => $this->serializeService($s), $services)]);
+    }
+
+    #[Route('/services/{id}', methods: ['GET'])]
+    public function show(Service $service): JsonResponse
+    {
+        return $this->json($this->serializeService($service));
+    }
+
+    #[Route('/provider/services', methods: ['GET'])]
+    #[IsGranted('ROLE_PRESTATAIRE')]
+    public function mine(ServiceRepository $repo): JsonResponse
+    {
+        $services = $repo->findBy(['provider' => $this->getUser()], ['id' => 'DESC']);
+        return $this->json(['data' => array_map(fn(Service $s) => $this->serializeService($s), $services)]);
     }
 
     #[Route('/provider/services', methods: ['POST'])]
@@ -59,7 +90,11 @@ class ServiceController extends AbstractController
         if (isset($data['title']))       $service->setTitle($data['title']);
         if (isset($data['price_min']))   $service->setPriceMin($data['price_min']);
         if (isset($data['price_max']))   $service->setPriceMax($data['price_max']);
+        if (isset($data['category']))    $service->setCategory($data['category']);
+        if (isset($data['experience']))  $service->setExperience((int) $data['experience']);
         if (isset($data['description'])) $service->setDescription($data['description']);
+        if (isset($data['governorates'])) $service->setGovernorates($data['governorates']);
+        if (isset($data['photos']))      $service->setPhotos($data['photos']);
         $em->flush();
         return $this->json(['message' => 'Service mis à jour']);
     }

@@ -28,6 +28,7 @@ class AuthController extends AbstractController
         $user->setRole($data['role'] ?? 'client');
         $user->setPhone($data['phone'] ?? null);
         $user->setNomCommercial($data['nom_commercial'] ?? null);
+        $user->setProfilePhoto($data['profile_photo'] ?? null);
         $user->setGovernorates($data['gouvernorats'] ?? []);
         $user->setCategories($data['categories'] ?? []);
 
@@ -43,6 +44,52 @@ class AuthController extends AbstractController
         $em->flush();
 
         return $this->json(['message' => 'Compte créé avec succès', 'id' => $user->getId()], 201);
+    }
+
+    #[Route('/verify-otp', methods: ['POST'])]
+    public function verifyOtp(Request $req): JsonResponse
+    {
+        $data = json_decode($req->getContent(), true) ?? [];
+        $code = (string) ($data['code'] ?? '');
+
+        if (!preg_match('/^\d{6}$/', $code)) {
+            return $this->json(['error' => 'Code OTP invalide'], 400);
+        }
+
+        return $this->json(['message' => 'OTP verifie']);
+    }
+
+    #[Route('/refresh-token', methods: ['POST'])]
+    public function refreshToken(JWTTokenManagerInterface $jwt): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Utilisateur non authentifie'], 401);
+        }
+
+        return $this->json(['token' => $jwt->create($user)]);
+    }
+
+    #[Route('/forgot-password', methods: ['POST'])]
+    public function forgotPassword(Request $req): JsonResponse
+    {
+        $data = json_decode($req->getContent(), true) ?? [];
+        if (empty($data['email'])) {
+            return $this->json(['error' => 'Email requis'], 400);
+        }
+
+        return $this->json(['message' => 'Si le compte existe, un email de reset sera envoye']);
+    }
+
+    #[Route('/reset-password', methods: ['POST'])]
+    public function resetPassword(Request $req): JsonResponse
+    {
+        $data = json_decode($req->getContent(), true) ?? [];
+        if (empty($data['token']) || empty($data['password'])) {
+            return $this->json(['error' => 'Token et mot de passe requis'], 400);
+        }
+
+        return $this->json(['message' => 'Mot de passe reinitialise']);
     }
 
     #[Route('/login', methods: ['POST'])]

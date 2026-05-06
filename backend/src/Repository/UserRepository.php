@@ -14,7 +14,9 @@ class UserRepository extends ServiceEntityRepository
 
     public function findNearby(float $lat, float $lng, float $radius = 10): array
     {
-        return $this->getEntityManager()->createNativeQuery("
+        $conn = $this->getEntityManager()->getConnection();
+
+        return $conn->executeQuery("
             SELECT *, (
                 6371 * acos(
                     cos(radians(:lat)) * cos(radians(latitude))
@@ -30,10 +32,10 @@ class UserRepository extends ServiceEntityRepository
             HAVING distance < :radius
             ORDER BY distance ASC
             LIMIT 20
-        ", new \Doctrine\ORM\Query\ResultSetMapping())
-        ->setParameter('lat', $lat)
-        ->setParameter('lng', $lng)
-        ->setParameter('radius', $radius)
-        ->getResult();
+        ", [
+            'lat' => $lat,
+            'lng' => $lng,
+            'radius' => $radius,
+        ])->fetchAllAssociative();
     }
 }

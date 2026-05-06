@@ -85,7 +85,7 @@ class ReviewController extends AbstractController
             'client'  => $r->getClient()->getNomCommercial() ?? $r->getClient()->getEmail(),
         ], $reviews);
 
-        return $this->json($data);
+        return $this->json(['data' => $data]);
     }
 
     // GET /api/provider/reviews — mes avis (prestataire connecté)
@@ -104,7 +104,7 @@ class ReviewController extends AbstractController
             'comment' => $r->getComment(),
         ], $reviews);
 
-        return $this->json($data);
+        return $this->json(['data' => $data]);
     }
 
     private function updateAverageRating(User $provider, EntityManagerInterface $em): void

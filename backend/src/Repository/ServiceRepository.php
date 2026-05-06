@@ -37,9 +37,17 @@ class ServiceRepository extends ServiceEntityRepository
                ->setParameter('rating', $filters['rating']);
         }
 
-        return $qb->orderBy('s.averageRating', 'DESC')
+        $results = $qb->orderBy('s.averageRating', 'DESC')
                   ->setMaxResults(20)
                   ->getQuery()
                   ->getResult();
+
+        if (!empty($filters['gouvernorat'])) {
+            $results = array_values(array_filter($results, fn(Service $service) =>
+                in_array($filters['gouvernorat'], $service->getGovernorates(), true)
+            ));
+        }
+
+        return $results;
     }
 }

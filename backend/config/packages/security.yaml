@@ -28,7 +28,7 @@ security:
     access_control:
         # Note: Only the *first* matching rule is applied
         # Autoriser l'inscription et la connexion
-        - { path: ^/api/(register|login)$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/(register|login|verify-otp|forgot-password|reset-password)$, roles: PUBLIC_ACCESS }
         # Tout le reste nécessite une authentification (les contrôleurs filtrent finement via IsGranted)
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
