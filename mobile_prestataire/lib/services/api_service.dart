@@ -34,6 +34,16 @@ class ApiService {
     return response.data;
   }
 
+  static Future<Map<String, dynamic>> put(String path, Map data) async {
+    final response = await _dio.put(path, data: data);
+    return response.data;
+  }
+
+  static Future<Map<String, dynamic>> delete(String path) async {
+    final response = await _dio.delete(path);
+    return response.data;
+  }
+
   static Future<void> saveToken(String token) async {
     await _storage.write(key: 'jwt_token', value: token);
   }

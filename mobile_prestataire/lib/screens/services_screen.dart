@@ -35,7 +35,10 @@ class _ServicesScreenState extends State<ServicesScreen> {
     final titleCtrl    = TextEditingController();
     final priceMinCtrl = TextEditingController();
     final priceMaxCtrl = TextEditingController();
+    final descriptionCtrl = TextEditingController();
+    int experience = 0;
     String selectedCategory = 'Plomberie';
+    final selectedGovernorates = <String>{'Tunis'};
 
     showModalBottomSheet(
       context: context,
@@ -60,7 +63,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: selectedCategory,
+            initialValue: selectedCategory,
             decoration: InputDecoration(
               labelText: 'Catégorie',
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -90,6 +93,50 @@ class _ServicesScreenState extends State<ServicesScreen> {
               ),
             )),
           ]),
+          const SizedBox(height: 12),
+          TextField(
+            controller: descriptionCtrl,
+            maxLines: 2,
+            decoration: InputDecoration(
+              labelText: 'Description',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          StatefulBuilder(
+            builder: (context, setSheetState) => Column(children: [
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                const Text('Annees experience'),
+                Row(children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline),
+                    onPressed: experience > 0 ? () => setSheetState(() => experience--) : null,
+                  ),
+                  Text('$experience'),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () => setSheetState(() => experience++),
+                  ),
+                ]),
+              ]),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Wrap(
+                  spacing: 8,
+                  children: ['Tunis', 'Ariana', 'Ben Arous', 'Sousse', 'Sfax'].map((g) {
+                    final selected = selectedGovernorates.contains(g);
+                    return FilterChip(
+                      label: Text(g),
+                      selected: selected,
+                      onSelected: (value) => setSheetState(() {
+                        value ? selectedGovernorates.add(g) : selectedGovernorates.remove(g);
+                      }),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ]),
+          ),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -101,13 +148,18 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () async {
+                final navigator = Navigator.of(context);
                 await ApiService.post('/provider/services', {
                   'title':     titleCtrl.text,
                   'category':  selectedCategory,
                   'price_min': double.tryParse(priceMinCtrl.text) ?? 0,
                   'price_max': double.tryParse(priceMaxCtrl.text) ?? 0,
+                  'description': descriptionCtrl.text,
+                  'experience': experience,
+                  'governorates': selectedGovernorates.toList(),
                 });
-                Navigator.pop(context);
+                if (!mounted) return;
+                navigator.pop();
                 _loadServices();
               },
               child: const Text('Ajouter', style: TextStyle(color: Colors.white)),
@@ -152,7 +204,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [BoxShadow(
                             blurRadius: 8,
-                            color: Colors.black.withOpacity(0.08))],
+                            color: Colors.black.withValues(alpha: 0.08))],
                       ),
                       child: Row(children: [
                         Expanded(child: Column(
@@ -169,13 +221,13 @@ class _ServicesScreenState extends State<ServicesScreen> {
                         )),
                         Switch(
                           value: s['isActive'] ?? true,
-                          activeColor: const Color(0xFF059669),
+                          activeThumbColor: const Color(0xFF059669),
                           onChanged: (v) => _toggleService(s['id'], v),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () async {
-                            await ApiService.patch('/provider/services/${s['id']}');
+                            await ApiService.delete('/provider/services/${s['id']}');
                             _loadServices();
                           },
                         ),
