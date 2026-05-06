@@ -34,8 +34,19 @@ class ReviewController extends AbstractController
         $review = new Review();
         $review->setClient($this->getUser());
         $review->setProvider($provider);
+
+        // Optionnel : associer le RDV à l'avis (recommandé)
+        if (isset($data['appointment_id'])) {
+            $appointment = $em->getRepository(\App\Entity\Appointment::class)->find($data['appointment_id']);
+            if (!$appointment) {
+                return $this->json(['error' => 'Appointment introuvable'], 404);
+            }
+            $review->setAppointment($appointment);
+        }
+
         $review->setRating($data['rating']);
         $review->setComment($data['comment'] ?? null);
+
 
         $em->persist($review);
 

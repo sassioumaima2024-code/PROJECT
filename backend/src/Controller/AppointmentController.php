@@ -26,12 +26,16 @@ class AppointmentController extends AbstractController
     #[IsGranted('ROLE_PRESTATAIRE')]
     public function accept(Appointment $appt, EntityManagerInterface $em): JsonResponse
     {
+        if ($appt->getProvider() !== $this->getUser()) {
+            return $this->json(['error' => 'Accès refusé'], 403);
+        }
         if ($appt->getStatus() !== Appointment::STATUS_PENDING) {
             return $this->json(['error' => 'Statut invalide'], 400);
         }
         $appt->setStatus(Appointment::STATUS_CONFIRMED);
         $em->flush();
         return $this->json(['status' => $appt->getStatus()]);
+
     }
     // POST /api/appointments — client crée une demande de RDV
     #[Route('/appointments', methods: ['POST'])]
@@ -76,12 +80,16 @@ class AppointmentController extends AbstractController
     #[IsGranted('ROLE_PRESTATAIRE')]
     public function refuse(Appointment $appt, Request $req, EntityManagerInterface $em): JsonResponse
     {
+        if ($appt->getProvider() !== $this->getUser()) {
+            return $this->json(['error' => 'Accès refusé'], 403);
+        }
         $data = json_decode($req->getContent(), true);
         $appt->setStatus(Appointment::STATUS_CANCELLED);
         $appt->setRefusalReason($data['reason'] ?? null);
         $em->flush();
         return $this->json(['status' => $appt->getStatus()]);
     }
+
 
     #[Route('/appointments/{id}/start', methods: ['PATCH'])]
     #[IsGranted('ROLE_PRESTATAIRE')]
