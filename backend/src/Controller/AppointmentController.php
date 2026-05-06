@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+
 #[Route('/api')]
 class AppointmentController extends AbstractController
 {
@@ -180,6 +181,7 @@ class AppointmentController extends AbstractController
 
         return $this->json(['status' => $appt->getStatus()]);
     }
+<<<<<<< HEAD
 
     private function serializeAppointment(Appointment $appt): array
     {
@@ -212,4 +214,31 @@ class AppointmentController extends AbstractController
         $notification->setType($type);
         $em->persist($notification);
     }
+=======
+    // GET /api/appointments/my — client voit ses réservations
+#[Route('/appointments/my', methods: ['GET'])]
+#[IsGranted('ROLE_CLIENT')]
+public function myClientAppointments(AppointmentRepository $repo): JsonResponse
+{
+    // Récupère toutes les réservations du client connecté
+    $appointments = $repo->findBy(
+        ['client' => $this->getUser()],
+        ['id' => 'DESC'] // Les plus récentes en premier
+    );
+
+    // Transforme chaque réservation en tableau JSON
+    $data = array_map(function($appt) {
+        return [
+            'id'           => $appt->getId(),
+            'status'       => $appt->getStatus(),
+            'description'  => $appt->getDescription(),
+            'scheduled_at' => $appt->getScheduledAt()?->format('Y-m-d'),
+            'budget'       => $appt->getBudget(),
+            'provider_id'  => $appt->getProvider()?->getId(),
+        ];
+    }, $appointments);
+
+    return $this->json($data);
+}
+>>>>>>> 9de80b7 (ajout de mon travail ghada)
 }
