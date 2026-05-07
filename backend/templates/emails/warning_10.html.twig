@@ -1,0 +1,50 @@
+{# templates/emails/warning_10.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: #4F3D8A; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: white; padding: 20px; border-radius: 0 0 8px 8px; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .footer { text-align: center; padding: 15px; color: #666; font-size: 12px; }
+        a { color: #4F3D8A; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚠️ Avertissement SERVICY</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour {{ user.nomCommercial ?? user.email }},</p>
+            
+            <div class="warning">
+                <strong>Vous avez reçu 10 mauvaises évaluations (≤ 2★)</strong>
+            </div>
+
+            <p>Nous vous contactons pour vous informer que votre compte a reçu plusieurs avis négatifs de la part de clients.</p>
+
+            <p><strong>Actions recommandées:</strong></p>
+            <ul>
+                <li>Vérifiez la qualité de votre travail et améliez vos prestations</li>
+                <li>Lisez les commentaires des clients pour identifier les points à améliorer</li>
+                <li>Contactez le support si vous pensez que certains avis sont injustifiés</li>
+            </ul>
+
+            <p><strong>Important:</strong> Si le nombre d'avis négatifs atteint 20, votre compte sera automatiquement suspendu.</p>
+
+            <p style="text-align: center; margin-top: 30px;">
+                <a href="https://app.servicy.tn/profile" style="background: #4F3D8A; color: white; padding: 10px 20px; border-radius: 4px; display: inline-block;">Voir mes avis</a>
+            </p>
+
+            <p>Cordialement,<br><strong>L'équipe SERVICY</strong></p>
+        </div>
+        <div class="footer">
+            <p>© 2026 SERVICY - Service à la Demande</p>
+        </div>
+    </div>
+</body>
+</html>

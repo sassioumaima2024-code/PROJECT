@@ -1,0 +1,53 @@
+{# templates/emails/warning_15.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: #DC2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: white; padding: 20px; border-radius: 0 0 8px 8px; }
+        .alert { background: #fee; border-left: 4px solid #DC2626; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .footer { text-align: center; padding: 15px; color: #666; font-size: 12px; }
+        a { color: #DC2626; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Alerte Critique - 15 Avis Négatifs</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour {{ user.nomCommercial ?? user.email }},</p>
+            
+            <div class="alert">
+                <strong style="color: #DC2626;">ALERTE URGENTE: Vous avez reçu 15 mauvaises évaluations!</strong>
+            </div>
+
+            <p>Votre compte approche du seuil de suspension. Vous avez actuellement <strong>15 avis négatifs</strong>, et il ne vous reste que <strong>5 mauvaises notes avant suspension</strong>.</p>
+
+            <p><strong>Mesures urgentes à prendre:</strong></p>
+            <ul>
+                <li>✅ Améliorez immédiatement la qualité de vos services</li>
+                <li>✅ Répondez aux commentaires des clients</li>
+                <li>✅ Corrigez les problèmes signalés</li>
+                <li>✅ Contactez le support SERVICY pour aide</li>
+            </ul>
+
+            <p style="background: #fef3c7; padding: 15px; border-radius: 4px; margin: 15px 0;">
+                <strong>⏰ Délai:</strong> Vous avez 7 jours pour améliorer votre profil avant risque de suspension automatique.
+            </p>
+
+            <p style="text-align: center; margin-top: 30px;">
+                <a href="https://support.servicy.tn/contact">Contacter le Support</a>
+            </p>
+
+            <p>Cordialement,<br><strong>L'équipe SERVICY</strong></p>
+        </div>
+        <div class="footer">
+            <p>© 2026 SERVICY - Service à la Demande</p>
+        </div>
+    </div>
+</body>
+</html>

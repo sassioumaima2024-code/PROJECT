@@ -2,7 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:8000/api',
+  );
   static final _storage = FlutterSecureStorage();
   static final _dio = Dio(BaseOptions(baseUrl: baseUrl));
 
@@ -19,6 +22,12 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> post(String path, Map data) async {
+    final response = await _dio.post(path, data: data);
+    return response.data;
+  }
+
+  static Future<Map<String, dynamic>> postForm(
+      String path, FormData data) async {
     final response = await _dio.post(path, data: data);
     return response.data;
   }
@@ -54,5 +63,20 @@ class ApiService {
 
   static Future<String?> getToken() async {
     return await _storage.read(key: 'jwt_token');
+  }
+
+  static Future<void> saveFcmToken(String fcmToken) async {
+    await _storage.write(key: 'fcm_token', value: fcmToken);
+    try {
+
+    await post('/profile/fcm-token', {'fcm_token': fcmToken});
+
+    } catch (e) {
+      print('Error saving FCM token to backend: $e');
+    }
+  }
+
+  static Future<String?> getFcmToken() async {
+    return await _storage.read(key: 'fcm_token');
   }
 }

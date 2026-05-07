@@ -57,6 +57,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private array $categories = [];
 
+    #[ORM\Column(type: 'json')]
+    private array $portfolio = [];
+
+    #[ORM\Column(type: 'json')]
+    private array $documents = [];
+
+    #[ORM\Column(length: 6, nullable: true)]
+    private ?string $otpCode = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $otpExpiresAt = null;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $isVerified = false;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
@@ -117,4 +132,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getCategories(): array { return $this->categories; }
     public function setCategories(array $v): self { $this->categories = $v; return $this; }
+
+    public function getPortfolio(): array { return $this->portfolio; }
+    public function setPortfolio(array $v): self { $this->portfolio = $v; return $this; }
+
+    public function getDocuments(): array { return $this->documents; }
+    public function setDocuments(array $v): self { $this->documents = $v; return $this; }
+
+    public function getOtpCode(): ?string { return $this->otpCode; }
+    public function setOtpCode(?string $v): self { $this->otpCode = $v; return $this; }
+
+    public function getOtpExpiresAt(): ?\DateTimeImmutable { return $this->otpExpiresAt; }
+    public function setOtpExpiresAt(?\DateTimeImmutable $v): self { $this->otpExpiresAt = $v; return $this; }
+
+    public function isVerified(): bool { return $this->isVerified; }
+    public function setIsVerified(bool $v): self { $this->isVerified = $v; return $this; }
 }

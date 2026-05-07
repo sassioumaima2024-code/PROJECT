@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_prestataire/services/api_service.dart';
@@ -21,18 +24,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _governorates = ['Tunis', 'Ariana', 'Ben Arous', 'Manouba', 'Sousse', 'Sfax', 'Nabeul'];
   final _categories = ['Plomberie', 'Electricite', 'Menage', 'Coiffure', 'Peinture', 'Taxi'];
   final Set<String> _selectedCategories = {};
-  final List<String> _portfolio = [];
+  final List<XFile> _portfolio = [];
   String _selectedGovernorate = 'Tunis';
-  String? _profilePhoto;
-  String? _cinDocument;
-  String? _certificateDocument;
+  XFile? _profilePhoto;
+  XFile? _cinDocument;
+  XFile? _certificateDocument;
   int _step = 0;
   bool _loading = false;
 
   Future<void> _pickProfilePhoto() async {
     final file = await _picker.pickImage(source: ImageSource.gallery);
     if (file != null) {
-      setState(() => _profilePhoto = file.name);
+      setState(() => _profilePhoto = file);
     }
   }
 
@@ -40,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_portfolio.length >= 10) return;
     final file = await _picker.pickImage(source: ImageSource.gallery);
     if (file != null) {
-      setState(() => _portfolio.add(file.name));
+      setState(() => _portfolio.add(file));
     }
   }
 
@@ -49,12 +52,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (file != null) {
       setState(() {
         if (cin) {
-          _cinDocument = file.name;
+          _cinDocument = file;
         } else {
-          _certificateDocument = file.name;
+          _certificateDocument = file;
         }
       });
     }
+  }
+
+  Future<MultipartFile> _multipart(XFile file) {
+    return MultipartFile.fromFile(file.path, filename: file.name);
   }
 
   Future<void> _register() async {
@@ -67,21 +74,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _loading = true);
     try {
-      final res = await ApiService.post('/register', {
+      final form = FormData.fromMap({
         'role': 'prestataire',
         'nom_commercial': _nomCtrl.text.trim(),
         'email': _emailCtrl.text.trim(),
         'phone': _phoneCtrl.text.trim(),
         'password': _passCtrl.text,
-        'gouvernorats': [_selectedGovernorate],
-        'categories': _selectedCategories.toList(),
-        'profile_photo': _profilePhoto,
-        'portfolio': _portfolio,
-        'documents': {
-          'cin': _cinDocument,
-          'certificate': _certificateDocument,
-        },
+        'gouvernorats': jsonEncode([_selectedGovernorate]),
+        'categories': jsonEncode(_selectedCategories.toList()),
       });
+      final profilePhoto = _profilePhoto;
+      final cinDocument = _cinDocument;
+      final certificateDocument = _certificateDocument;
+      if (profilePhoto != null) {
+        form.files.add(MapEntry('profile_photo', await _multipart(profilePhoto)));
+      }
+      if (cinDocument != null) {
+        form.files.add(MapEntry('cin_document', await _multipart(cinDocument)));
+      }
+      if (certificateDocument != null) {
+        form.files.add(MapEntry('certificate_document', await _multipart(certificateDocument)));
+      }
+      for (final file in _portfolio) {
+        form.files.add(MapEntry('portfolio[]', await _multipart(file)));
+      }
+
+      final res = await ApiService.postForm('/register', form);
       final login = await ApiService.post('/login', {
         'email': _emailCtrl.text.trim(),
         'password': _passCtrl.text,
@@ -92,7 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
       setState(() => _step = 2);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Compte cree, ID: ${res['id']}')),
+        SnackBar(content: Text('Compte cree. OTP dev: ${res['dev_otp'] ?? 'envoye'}')),
       );
     } catch (e) {
       if (!mounted) return;
@@ -105,7 +123,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _verifyOtp() async {
     setState(() => _loading = true);
     try {
-      await ApiService.post('/verify-otp', {'code': _otpCtrl.text.trim()});
+      await ApiService.post('/verify-otp', {
+        'email': _emailCtrl.text.trim(),
+        'code': _otpCtrl.text.trim(),
+      });
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/dashboard');
     } catch (e) {
@@ -183,10 +204,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _docsStep() {
     return Column(children: [
-      _uploadTile('Photo profil', _profilePhoto, _pickProfilePhoto),
-      _uploadTile('CIN', _cinDocument, () => _pickDocument(true)),
-      _uploadTile('Certificat', _certificateDocument, () => _pickDocument(false)),
-      _uploadTile('Portfolio (${_portfolio.length}/10)', _portfolio.isEmpty ? null : _portfolio.join(', '), _pickPortfolioPhoto),
+      _uploadTile('Photo profil', _profilePhoto?.name, _pickProfilePhoto),
+      _uploadTile('CIN', _cinDocument?.name, () => _pickDocument(true)),
+      _uploadTile('Certificat', _certificateDocument?.name, () => _pickDocument(false)),
+      _uploadTile('Portfolio (${_portfolio.length}/10)', _portfolio.isEmpty ? null : _portfolio.map((file) => file.name).join(', '), _pickPortfolioPhoto),
       const SizedBox(height: 20),
       _primaryButton(_loading ? 'Creation...' : 'Creer mon compte', _loading ? null : _register),
     ]);
@@ -255,5 +276,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 16)),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nomCtrl.dispose();
+    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
+    _passCtrl.dispose();
+    _otpCtrl.dispose();
+    super.dispose();
   }
 }

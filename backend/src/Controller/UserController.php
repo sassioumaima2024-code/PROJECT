@@ -38,6 +38,9 @@ class UserController extends AbstractController
             'governorates'   => $user->getGovernorates(),
             'categories'     => $user->getCategories(),
             'profilePhoto'   => $user->getProfilePhoto(),
+            'portfolio'      => $user->getPortfolio(),
+            'documents'      => $user->getDocuments(),
+            'isVerified'     => $user->isVerified(),
         ]);
     }
 
@@ -80,6 +83,9 @@ class UserController extends AbstractController
                 'governorates'   => $user->getGovernorates(),
                 'categories'     => $user->getCategories(),
                 'profilePhoto'   => $user->getProfilePhoto(),
+                'portfolio'      => $user->getPortfolio(),
+                'documents'      => $user->getDocuments(),
+                'isVerified'     => $user->isVerified(),
             ]
         ]);
     }

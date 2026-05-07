@@ -1,0 +1,63 @@
+{# templates/emails/suspension.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .header { background: #DC2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: white; padding: 20px; border-radius: 0 0 8px 8px; }
+        .alert { background: #fecaca; border-left: 4px solid #DC2626; padding: 15px; margin: 15px 0; border-radius: 4px; color: #7f1d1d; }
+        .footer { text-align: center; padding: 15px; color: #666; font-size: 12px; }
+        a { color: #DC2626; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚫 Compte Suspendu</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour {{ user.nomCommercial ?? user.email }},</p>
+            
+            <div class="alert">
+                <strong>Votre compte SERVICY a été suspendu automatiquement.</strong>
+            </div>
+
+            <p><strong>Raison:</strong> Votre compte a reçu 20 avis négatifs (évaluations ≤ 2★), ce qui dépasse le seuil d'acceptabilité de notre plateforme.</p>
+
+            <h3>Conséquences immédiates:</h3>
+            <ul>
+                <li>❌ Vous ne pouvez plus recevoir de demandes de services</li>
+                <li>❌ Vos services ont été masqués de la plateforme</li>
+                <li>❌ Vos clients ne peuvent plus vous contacter</li>
+                <li>⏳ Suspension en vigueur jusqu'à révision</li>
+            </ul>
+
+            <h3>Comment contester ou appeler?</h3>
+            <p>Si vous pensez que cette suspension est injustifiée, vous avez le droit de:</p>
+            <ol>
+                <li>Soumettre un appel auprès de notre équipe support</li>
+                <li>Fournir des explications détaillées sur chaque avis contesté</li>
+                <li>Demander une révision manuelle de votre dossier</li>
+            </ol>
+
+            <p style="text-align: center; margin-top: 30px;">
+                <a href="https://support.servicy.tn/appeal">📝 Soumettre un appel</a>
+            </p>
+
+            <p style="background: #e0e7ff; padding: 15px; border-radius: 4px; margin: 15px 0;">
+                <strong>Délai de réponse:</strong> Les appels sont examinés sous 7 jours ouvrables.
+            </p>
+
+            <p>Nous apprécions les prestataires de qualité sur SERVICY. Si vous souhaitez améliorer votre service et réappliquer, contactez-nous.</p>
+
+            <p>Cordialement,<br><strong>L'équipe SERVICY</strong></p>
+        </div>
+        <div class="footer">
+            <p>© 2026 SERVICY - Service à la Demande</p>
+        </div>
+    </div>
+</body>
+</html>
