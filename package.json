@@ -1,0 +1,15 @@
+{
+  "name": "servicy-e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for SERVICY application",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "cypress run --browser chrome",
+    "test:e2e:headed": "cypress run --browser chrome --headed"
+  },
+  "devDependencies": {
+    "cypress": "^13.6.0",
+    "@cypress/xhr": "^2.0.1"
+  }
+}

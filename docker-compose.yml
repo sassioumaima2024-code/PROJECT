@@ -1,0 +1,62 @@
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-servicy}
+      MYSQL_USER: ${DB_USER:-servicy}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - servicy
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.simple
+    environment:
+      DATABASE_URL: mysql://${DB_USER:-servicy}:${DB_PASSWORD:-password}@mysql:3306/${DB_NAME:-servicy}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-your-secret-key}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-your-public-key}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    volumes:
+      - ./backend:/app
+    networks:
+      - servicy
+
+  admin:
+    build:
+      context: ./frontend-admin
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - servicy
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - servicy
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  servicy:
+    driver: bridge

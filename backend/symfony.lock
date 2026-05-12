@@ -71,6 +71,18 @@
             "./config/packages/nelmio_cors.yaml"
         ]
     },
+    "php-http/discovery": {
+        "version": "1.20",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.18",
+            "ref": "f45b5dd173a27873ab19f5e3180b2f661c21de02"
+        },
+        "files": [
+            "./config/packages/http_discovery.yaml"
+        ]
+    },
     "phpunit/phpunit": {
         "version": "11.5",
         "recipe": {
@@ -84,6 +96,18 @@
             "./phpunit.dist.xml",
             "./tests/bootstrap.php",
             "./bin/phpunit"
+        ]
+    },
+    "sentry/sentry-symfony": {
+        "version": "4.14",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "4.6",
+            "ref": "9ce177d985f35c9d2a29478fa1de79b7749ee3bf"
+        },
+        "files": [
+            "./config/packages/sentry.yaml"
         ]
     },
     "symfony/asset-mapper": {

@@ -16,6 +16,16 @@ class ReviewRepository extends ServiceEntityRepository
         parent::__construct($registry, Review::class);
     }
 
+    public function getAverageRating(): float
+    {
+        $result = $this->createQueryBuilder('r')
+            ->select('AVG(r.rating) as avgRating')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $result !== null ? (float) $result : 0.0;
+    }
+
     //    /**
     //     * @return Review[] Returns an array of Review objects
     //     */

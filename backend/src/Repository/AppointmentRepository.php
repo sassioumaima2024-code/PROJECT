@@ -16,6 +16,20 @@ class AppointmentRepository extends ServiceEntityRepository
         parent::__construct($registry, Appointment::class);
     }
 
+    public function findThisMonth(): array
+    {
+        $start = new \DateTime('first day of this month 00:00:00');
+        $end = new \DateTime('last day of this month 23:59:59');
+
+        return $this->createQueryBuilder('a')
+            ->where('a.scheduledAt >= :start')
+            ->andWhere('a.scheduledAt <= :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Appointment[] Returns an array of Appointment objects
     //     */

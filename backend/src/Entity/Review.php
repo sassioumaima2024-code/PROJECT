@@ -24,6 +24,9 @@ class Review
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $comment = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $isFlagged = false;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
@@ -39,4 +42,9 @@ class Review
     public function setRating(int $r): self { $this->rating = $r; return $this; }
     public function getComment(): ?string { return $this->comment; }
     public function setComment(?string $c): self { $this->comment = $c; return $this; }
+    
+    public function getReviewer(): User { return $this->client; }
+    
+    public function isFlagged(): bool { return $this->isFlagged; }
+    public function setIsFlagged(bool $isFlagged): self { $this->isFlagged = $isFlagged; return $this; }
 }

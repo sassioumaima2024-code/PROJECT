@@ -48,3 +48,14 @@ export async function apiPatch(endpoint: string, data: object) {
   });
   return res.json();
 }
+
+export async function apiDelete(endpoint: string) {
+  const token = localStorage.getItem('admin_token');
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  return res.json();
+}
