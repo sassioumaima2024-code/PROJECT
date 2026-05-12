@@ -1,0 +1,353 @@
+==================================================
+     GUIDE TEST SERVICY - COMMANDE PAR COMMANDE
+==================================================
+Date: 10/05/2026
+Objectif: Tester toutes les fonctionnalités du projet SERVICY
+
+==================================================
+ÉTAPE 1: PRÉREQUIS SYSTÈME
+==================================================
+
+1.1 Vérifier PHP
+Commande: php --version
+Résultat attendu: PHP 8.2.0 ou supérieur
+Si erreur: Installer PHP depuis https://www.php.net/downloads.php
+
+1.2 Vérifier Node.js
+Commande: node --version
+Résultat attendu: v18.0.0 ou supérieur
+Si erreur: Installer Node.js depuis https://nodejs.org/
+
+1.3 Vérifier Flutter
+Commande: flutter --version
+Résultat attendu: Flutter 3.11.0 ou supérieur
+Si erreur: Installer Flutter depuis https://flutter.dev/docs/get-started/install/windows
+
+1.4 Vérifier Docker
+Commande: docker --version
+Résultat attendu: Docker 20.10.0 ou supérieur
+Si erreur: Installer Docker Desktop depuis https://www.docker.com/products/docker-desktop/
+
+==================================================
+ÉTAPE 2: DÉMARRAGE DES SERVICES DOCKER
+==================================================
+
+2.1 Démarrer Docker Desktop
+Action: Lancer Docker Desktop depuis le menu Démarrer
+Attendre: Icône Docker devient verte
+
+2.2 Démarrer les conteneurs
+Commande: docker compose up -d
+Résultat attendu: 4 services démarrés (backend, mysql, redis, admin)
+
+2.3 Vérifier les services
+Commande: docker compose ps
+Résultat attendu: Tous les services avec status "Up"
+
+2.4 Attendre démarrage complet
+Commande: timeout 30
+Action: Attendre 30 secondes
+
+==================================================
+ÉTAPE 3: TEST BACKEND API
+==================================================
+
+3.1 Test de santé API
+Commande: Invoke-WebRequest -Uri "http://localhost:8000/api/health"
+Résultat attendu: StatusCode 200 OK
+
+3.2 Test authentification admin
+Commande: $body = @{email="admin@servicy.tn";password="admin123"} | ConvertTo-Json
+Commande: $response = Invoke-WebRequest -Uri "http://localhost:8000/api/login" -Method POST -ContentType "application/json" -Body $body
+Commande: $data = $response.Content | ConvertFrom-Json
+Commande: $token = $data.token
+Résultat attendu: Token JWT reçu
+
+3.3 Test endpoint services
+Commande: $headers = @{Authorization = "Bearer $token"}
+Commande: Invoke-WebRequest -Uri "http://localhost:8000/api/services" -Headers $headers
+Résultat attendu: Liste des services retournée
+
+3.4 Test création rendez-vous
+Commande: $appointment = @{provider_id=1; service_id=1; scheduled_at=(Get-Date).AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss"); description="Test appointment"; budget=100.0; address="Test Address"; latitude=36.8065; longitude=10.1815} | ConvertTo-Json
+Commande: Invoke-WebRequest -Uri "http://localhost:8000/api/appointments" -Method POST -Headers $headers -ContentType "application/json" -Body $appointment
+Résultat attendu: Rendez-vous créé avec succès
+
+==================================================
+ÉTAPE 4: TEST APPLICATION MOBILE CLIENT
+==================================================
+
+4.1 Navigation vers dossier client
+Commande: cd mobile_client
+
+4.2 Vérifier installation Flutter
+Commande: flutter doctor
+Résultat attendu: "No issues found!"
+
+4.3 Installer dépendances
+Commande: flutter pub get
+Résultat attendu: "Got dependencies!"
+
+4.4 Lancer application web
+Commande: flutter run -d chrome
+Résultat attendu: Navigateur Chrome s'ouvre avec l'application
+
+4.5 Tests fonctionnalités dans le navigateur:
+- Cliquer sur "S'inscrire"
+- Remplir formulaire d'inscription
+- Se connecter avec les identifiants créés
+- Rechercher des services
+- Tenter une réservation
+
+==================================================
+ÉTAPE 5: TEST APPLICATION MOBILE PRESTATAIRE
+==================================================
+
+5.1 Navigation vers dossier prestataire
+Commande: cd ../mobile_prestataire
+
+5.2 Vérifier installation Flutter
+Commande: flutter doctor
+Résultat attendu: "No issues found!"
+
+5.3 Installer dépendances
+Commande: flutter pub get
+Résultat attendu: "Got dependencies!"
+
+5.4 Lancer application web
+Commande: flutter run -d chrome
+Résultat attendu: Navigateur Chrome s'ouvre avec l'application
+
+5.5 Tests fonctionnalités dans le navigateur:
+- Se connecter avec provider@test.tn / pass123
+- Vérifier le dashboard
+- Consulter la liste des services
+- Vérifier l'agenda des rendez-vous
+
+==================================================
+ÉTAPE 6: TEST DASHBOARD ADMIN
+==================================================
+
+6.1 Navigation vers dossier admin
+Commande: cd ../frontend-admin
+
+6.2 Installer dépendances
+Commande: npm install
+Résultat attendu: Installation réussie sans erreurs
+
+6.3 Démarrer serveur développement
+Commande: npm run dev
+Résultat attendu: Serveur démarré sur http://localhost:3000
+
+6.4 Accès au dashboard
+Action: Ouvrir http://localhost:3000 dans navigateur
+
+6.5 Connexion admin
+Identifiant: admin@servicy.tn
+Mot de passe: admin123
+
+6.6 Tests fonctionnalités admin:
+- Vérifier les KPIs sur le dashboard
+- Naviguer vers "Gestion des prestataires"
+- Tester la validation d'un prestataire
+- Naviguer vers "Modération des avis"
+- Tester l'approbation d'un avis
+
+==================================================
+ÉTAPE 7: TEST BASE DE DONNÉES
+==================================================
+
+7.1 Navigation vers dossier backend
+Commande: cd ../backend
+
+7.2 Test connexion base de données
+Commande: php bin/console doctrine:database:exists
+Résultat attendu: "Database exists"
+
+7.3 Validation schéma
+Commande: php bin/console doctrine:schema:validate
+Résultat attendu: "Database schema is in sync"
+
+7.4 Test migration
+Commande: php bin/console doctrine:migrations:migrate
+Résultat attendu: "No migrations to execute"
+
+==================================================
+ÉTAPE 8: TEST REDIS CACHE
+==================================================
+
+8.1 Test connexion Redis
+Commande: redis-cli ping
+Résultat attendu: "PONG"
+
+8.2 Test écriture/lecture Redis
+Commande: redis-cli set test_key "test_value"
+Commande: redis-cli get test_key
+Résultat attendu: "test_value"
+
+==================================================
+ÉTAPE 9: TESTS END-TO-END AUTOMATISÉS
+==================================================
+
+9.1 Navigation vers dossier racine
+Commande: cd ..
+
+9.2 Installation Cypress
+Commande: npm install
+Résultat attendu: Installation réussie
+
+9.3 Lancement tests Cypress
+Commande: npm run cypress:open
+Action: Interface Cypress s'ouvre
+
+9.4 Exécution tests admin
+Commande: npx cypress run --spec "cypress/e2e/admin-dashboard.cy.js"
+Résultat attendu: Tous les tests passent
+
+9.5 Exécution tests API
+Commande: npx cypress run --spec "cypress/e2e/api-tests.cy.js"
+Résultat attendu: Tous les tests passent
+
+==================================================
+ÉTAPE 10: TESTS DE SÉCURITÉ
+==================================================
+
+10.1 Test authentification invalide
+Commande: $body = @{email="admin@servicy.tn";password="wrongpassword"} | ConvertTo-Json
+Commande: try { Invoke-WebRequest -Uri "http://localhost:8000/api/login" -Method POST -ContentType "application/json" -Body $body } catch { Write-Host "Sécurité OK: Rejeté" }
+Résultat attendu: "Sécurité OK: Rejeté"
+
+10.2 Test injection SQL
+Commande: $malicious = @{description="'; DROP TABLE users; --"} | ConvertTo-Json
+Commande: try { Invoke-WebRequest -Uri "http://localhost:8000/api/appointments" -Method POST -Headers $headers -ContentType "application/json" -Body $malicious } catch { Write-Host "Sécurité OK: Injection bloquée" }
+Résultat attendu: "Sécurité OK: Injection bloquée"
+
+==================================================
+ÉTAPE 11: TESTS DE PERFORMANCE
+==================================================
+
+11.1 Test temps de réponse API
+Commande: $time = Measure-Command { Invoke-WebRequest -Uri "http://localhost:8000/api/health" }
+Commande: Write-Host "Temps de réponse: $($time.TotalMilliseconds)ms"
+Résultat attendu: Temps < 200ms
+
+11.2 Test charge API (10 requêtes simultanées)
+Commande: for ($i=1; $i -le 10; $i++) { Start-Job -ScriptBlock { Invoke-WebRequest -Uri "http://localhost:8000/api/health" } }
+Commande: Get-Job | Wait-Job | Receive-Job
+Résultat attendu: Toutes les requêtes réussissent
+
+==================================================
+ÉTAPE 12: VÉRIFICATION FINALE
+==================================================
+
+12.1 Check-list complète
+Commande: Write-Host "=== VÉRIFICATION FINALE ==="
+
+12.2 Test API complet
+Commande: try { Invoke-WebRequest -Uri "http://localhost:8000/api/health"; Write-Host "✅ API: OK" } catch { Write-Host "❌ API: FAILED" }
+
+12.3 Test Admin complet
+Commande: try { Invoke-WebRequest -Uri "http://localhost:3000"; Write-Host "✅ Admin: OK" } catch { Write-Host "❌ Admin: FAILED" }
+
+12.4 Test Database complet
+Commande: cd backend; try { php bin/console doctrine:database:exists; Write-Host "✅ Database: OK" } catch { Write-Host "❌ Database: FAILED" }
+
+12.5 Test Flutter complet
+Commande: cd ../mobile_client; try { flutter doctor; Write-Host "✅ Flutter Client: OK" } catch { Write-Host "❌ Flutter Client: FAILED" }
+Commande: cd ../mobile_prestataire; try { flutter doctor; Write-Host "✅ Flutter Provider: OK" } catch { Write-Host "❌ Flutter Provider: FAILED" }
+
+==================================================
+CRITÈRES DE VALIDATION
+==================================================
+
+Backend API:
+□ Health endpoint répond (200 OK)
+□ Authentification fonctionne
+□ CRUD services/rendez-vous fonctionne
+□ Paiements Stripe opérationnels
+□ Messagerie fonctionne
+
+Applications Mobiles:
+□ Flutter compile sans erreur
+□ Interface responsive
+□ Connexion backend réussie
+□ Notifications reçues
+□ GPS tracking fonctionnel
+
+Dashboard Admin:
+□ Interface accessible
+□ Login admin fonctionne
+□ CRUD prestataires fonctionne
+□ KPIs affichés correctement
+□ Export données fonctionne
+
+Tests Automatisés:
+□ Cypress tests passent
+□ Couverture >90%
+□ Tests performance OK
+□ Tests sécurité OK
+
+==================================================
+DÉPANNAGE RAPIDE
+==================================================
+
+Si API ne répond pas:
+Commande: docker compose logs backend
+Commande: docker compose restart backend
+
+Si Flutter ne compile pas:
+Commande: flutter clean
+Commande: flutter pub cache repair
+Commande: flutter pub get
+
+Si Admin ne démarre pas:
+Commande: cd frontend-admin
+Commande: rm -rf node_modules
+Commande: npm install
+Commande: npm run dev
+
+Si Database inaccessible:
+Commande: cd backend
+Commande: php bin/console doctrine:database:create
+Commande: php bin/console doctrine:migrations:migrate
+
+==================================================
+RAPPORT FINAL
+==================================================
+
+À la fin de tous les tests, créer un rapport:
+Commande: $report = @"
+RAPPORT DE TEST SERVICY
+Date: $(Get-Date)
+API: http://localhost:8000
+Admin: http://localhost:3000
+Mobile: Flutter apps ready
+Database: Connected
+Services: All running
+"@
+Commande: $report | Out-File -FilePath "RAPPORT_TEST_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
+
+==================================================
+FIN DES TESTS
+==================================================
+
+Si toutes les étapes sont validées avec succès:
+✅ Le projet SERVICY est 100% fonctionnel
+✅ Prêt pour le déploiement en production
+✅ Toutes les fonctionnalités testées et validées
+
+Prochaine étape: Déploiement en environnement de staging/production
+
+==================================================
+NOTES IMPORTANTES
+==================================================
+
+- Toutes les commandes sont à exécuter dans PowerShell
+- Chaque étape doit être validée avant de passer à la suivante
+- En cas d'erreur, consulter la section "DÉPANNAGE RAPIDE"
+- Les identifiants de test sont dans la section correspondante
+- Le rapport final est généré automatiquement à la dernière étape
+
+==================================================
+FIN DU GUIDE
+==================================================

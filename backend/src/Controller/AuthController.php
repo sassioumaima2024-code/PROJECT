@@ -37,15 +37,19 @@ class AuthController extends AbstractController
         $user->setRole($data['role'] ?? 'client');
         $user->setPhone($data['phone'] ?? null);
         $user->setNomCommercial($data['nom_commercial'] ?? null);
+        $user->setAddress($data['address'] ?? null);
         $user->setProfilePhoto($this->storeUploadedFile($req->files->get('profile_photo'), 'profiles') ?? ($data['profile_photo'] ?? null));
         $user->setGovernorates($data['gouvernorats'] ?? []);
         $user->setCategories($data['categories'] ?? []);
+        $user->setDescription($data['description'] ?? null);
         $user->setPortfolio($this->storeUploadedFiles($req->files->all('portfolio'), 'portfolio'));
         $user->setDocuments(array_filter([
             'cin' => $this->storeUploadedFile($req->files->get('cin_document'), 'documents') ?? ($data['documents']['cin'] ?? null),
             'certificate' => $this->storeUploadedFile($req->files->get('certificate_document'), 'documents') ?? ($data['documents']['certificate'] ?? null),
         ]));
-        $user->setOtpCode((string) random_int(100000, 999999));
+        // Code de test '123456' en dev, sinon code aléatoire
+        $isDev = $this->getParameter('kernel.environment') !== 'prod';
+        $user->setOtpCode($isDev ? '123456' : (string) random_int(100000, 999999));
         $user->setOtpExpiresAt(new \DateTimeImmutable('+15 minutes'));
 
         $roles = match($user->getRole()) {

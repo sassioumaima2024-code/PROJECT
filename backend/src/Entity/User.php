@@ -2,6 +2,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -32,6 +34,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $phone = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $address = null;
 
     #[ORM\Column(nullable: true)]
     private ?string $profilePhoto = null;
@@ -72,12 +77,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private bool $isVerified = false;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $metadata = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $averageRating = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class)]
+    private Collection $sentMessages;
+
+    #[ORM\OneToMany(mappedBy: 'recipient', targetEntity: Message::class)]
+    private Collection $receivedMessages;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->sentMessages = new ArrayCollection();
+        $this->receivedMessages = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -108,6 +130,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getPhone(): ?string { return $this->phone; }
     public function setPhone(?string $p): self { $this->phone = $p; return $this; }
+
+    public function getAddress(): ?string { return $this->address; }
+    public function setAddress(?string $a): self { $this->address = $a; return $this; }
 
     public function getProfilePhoto(): ?string { return $this->profilePhoto; }
     public function setProfilePhoto(?string $v): self { $this->profilePhoto = $v; return $this; }
@@ -147,4 +172,58 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function isVerified(): bool { return $this->isVerified; }
     public function setIsVerified(bool $v): self { $this->isVerified = $v; return $this; }
+
+    public function getMetadata(): ?array { return $this->metadata; }
+    public function setMetadata(?array $metadata): self { $this->metadata = $metadata; return $this; }
+
+    public function getAverageRating(): ?float { return $this->averageRating; }
+    public function setAverageRating(?float $v): self { $this->averageRating = $v; return $this; }
+
+    public function getDescription(): ?string { return $this->description; }
+    public function setDescription(?string $v): self { $this->description = $v; return $this; }
+
+    public function getSentMessages(): Collection { return $this->sentMessages; }
+    
+    public function addSentMessage(Message $message): self {
+        if (!$this->sentMessages->contains($message)) {
+            $this->sentMessages->add($message);
+            $message->setSender($this);
+        }
+        return $this;
+    }
+    
+    public function removeSentMessage(Message $message): self {
+        if ($this->sentMessages->removeElement($message)) {
+            if ($message->getSender() === $this) {
+                $message->setSender(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getReceivedMessages(): Collection { return $this->receivedMessages; }
+    
+    public function addReceivedMessage(Message $message): self {
+        if (!$this->receivedMessages->contains($message)) {
+            $this->receivedMessages->add($message);
+            $message->setRecipient($this);
+        }
+        return $this;
+    }
+    
+    public function removeReceivedMessage(Message $message): self {
+        if ($this->receivedMessages->removeElement($message)) {
+            if ($message->getRecipient() === $this) {
+                $message->setRecipient(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getAllMessages(): Collection {
+        return new ArrayCollection(array_merge(
+            $this->sentMessages->toArray(),
+            $this->receivedMessages->toArray()
+        ));
+    }
 }

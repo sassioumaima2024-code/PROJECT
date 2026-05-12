@@ -33,6 +33,7 @@ class UserController extends AbstractController
             'role'           => $user->getRole(),
             'nomCommercial'  => $user->getNomCommercial(),
             'phone'          => $user->getPhone(),
+            'address'        => $user->getAddress(),
             'isActive'       => $user->isActive(),
             'isAvailableNow' => $user->isAvailableNow(),
             'governorates'   => $user->getGovernorates(),
@@ -41,6 +42,7 @@ class UserController extends AbstractController
             'portfolio'      => $user->getPortfolio(),
             'documents'      => $user->getDocuments(),
             'isVerified'     => $user->isVerified(),
+            'description'    => $user->getDescription(),
         ]);
     }
 
@@ -64,8 +66,10 @@ class UserController extends AbstractController
 
         if (isset($data['nom_commercial'])) $user->setNomCommercial($data['nom_commercial']);
         if (isset($data['phone']))          $user->setPhone($data['phone']);
+        if (isset($data['address']))        $user->setAddress($data['address']);
         if (isset($data['governorates']))   $user->setGovernorates($data['governorates']);
         if (isset($data['categories']))     $user->setCategories($data['categories']);
+        if (isset($data['description']))    $user->setDescription($data['description']);
 
         $em->persist($user);
         $em->flush();
@@ -86,6 +90,7 @@ class UserController extends AbstractController
                 'portfolio'      => $user->getPortfolio(),
                 'documents'      => $user->getDocuments(),
                 'isVerified'     => $user->isVerified(),
+                'description'    => $user->getDescription(),
             ]
         ]);
     }

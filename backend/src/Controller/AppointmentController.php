@@ -12,7 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-
 #[Route('/api')]
 class AppointmentController extends AbstractController
 {
@@ -21,7 +20,10 @@ class AppointmentController extends AbstractController
     public function myAppointments(AppointmentRepository $repo): JsonResponse
     {
         $appointments = $repo->findBy(['provider' => $this->getUser()], ['scheduledAt' => 'ASC']);
-        return $this->json(['data' => array_map(fn(Appointment $a) => $this->serializeAppointment($a), $appointments)]);
+
+        return $this->json([
+            'data' => array_map(fn(Appointment $a) => $this->serializeAppointment($a), $appointments)
+        ]);
     }
 
     #[Route('/provider/appointments/calendar', methods: ['GET'])]
@@ -29,11 +31,43 @@ class AppointmentController extends AbstractController
     public function calendar(AppointmentRepository $repo): JsonResponse
     {
         $appointments = $repo->findBy(['provider' => $this->getUser()]);
-        return $this->json(['data' => array_map(fn(Appointment $a) => [
-            'id' => $a->getId(),
-            'date' => $a->getScheduledAt()->format('Y-m-d'),
-            'status' => $a->getStatus(),
-        ], $appointments)]);
+
+        return $this->json([
+            'data' => array_map(fn(Appointment $a) => [
+                'id' => $a->getId(),
+                'date' => $a->getScheduledAt()->format('Y-m-d'),
+                'status' => $a->getStatus(),
+            ], $appointments)
+        ]);
+    }
+
+    #[Route('/provider/stats', methods: ['GET'])]
+    #[IsGranted('ROLE_PRESTATAIRE')]
+    public function stats(AppointmentRepository $repo): JsonResponse
+    {
+        $provider = $this->getUser();
+        $all = $repo->findBy(['provider' => $provider]);
+        
+        $today = 0;
+        $month = 0;
+        $now = new \DateTime();
+        $todayStr = $now->format('Y-m-d');
+        $monthStr = $now->format('Y-m');
+
+        foreach ($all as $a) {
+            if ($a->getScheduledAt()->format('Y-m-d') === $todayStr) {
+                $today++;
+            }
+            if ($a->getScheduledAt()->format('Y-m') === $monthStr) {
+                $month++;
+            }
+        }
+
+        return $this->json([
+            'today' => $today,
+            'month' => $month,
+            'rating' => $provider->getAverageRating() ?? 0,
+        ]);
     }
 
     #[Route('/appointments/{id}', methods: ['GET'])]
@@ -73,7 +107,13 @@ class AppointmentController extends AbstractController
         $appt->setStatus(Appointment::STATUS_PENDING);
 
         $em->persist($appt);
-        $this->createNotification($em, $provider, 'Nouvelle demande de RDV', 'Un client vous a envoye une demande.', 'new_appointment');
+        $this->createNotification(
+            $em,
+            $provider,
+            'Nouvelle demande de RDV',
+            'Un client vous a envoye une demande.',
+            'new_appointment'
+        );
         $em->flush();
 
         return $this->json([
@@ -181,7 +221,30 @@ class AppointmentController extends AbstractController
 
         return $this->json(['status' => $appt->getStatus()]);
     }
-<<<<<<< HEAD
+
+    // GET /api/appointments/my — client voit ses réservations
+    #[Route('/appointments/my', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
+    public function myClientAppointments(AppointmentRepository $repo): JsonResponse
+    {
+        $appointments = $repo->findBy(
+            ['client' => $this->getUser()],
+            ['id' => 'DESC']
+        );
+
+        $data = array_map(function (Appointment $appt) {
+            return [
+                'id' => $appt->getId(),
+                'status' => $appt->getStatus(),
+                'description' => $appt->getDescription(),
+                'scheduled_at' => $appt->getScheduledAt()?->format('Y-m-d'),
+                'budget' => $appt->getBudget(),
+                'provider_id' => $appt->getProvider()?->getId(),
+            ];
+        }, $appointments);
+
+        return $this->json($data);
+    }
 
     private function serializeAppointment(Appointment $appt): array
     {
@@ -214,31 +277,5 @@ class AppointmentController extends AbstractController
         $notification->setType($type);
         $em->persist($notification);
     }
-=======
-    // GET /api/appointments/my — client voit ses réservations
-#[Route('/appointments/my', methods: ['GET'])]
-#[IsGranted('ROLE_CLIENT')]
-public function myClientAppointments(AppointmentRepository $repo): JsonResponse
-{
-    // Récupère toutes les réservations du client connecté
-    $appointments = $repo->findBy(
-        ['client' => $this->getUser()],
-        ['id' => 'DESC'] // Les plus récentes en premier
-    );
-
-    // Transforme chaque réservation en tableau JSON
-    $data = array_map(function($appt) {
-        return [
-            'id'           => $appt->getId(),
-            'status'       => $appt->getStatus(),
-            'description'  => $appt->getDescription(),
-            'scheduled_at' => $appt->getScheduledAt()?->format('Y-m-d'),
-            'budget'       => $appt->getBudget(),
-            'provider_id'  => $appt->getProvider()?->getId(),
-        ];
-    }, $appointments);
-
-    return $this->json($data);
 }
->>>>>>> 9de80b7 (ajout de mon travail ghada)
-}
+

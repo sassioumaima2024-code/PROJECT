@@ -2,6 +2,8 @@
 namespace App\Entity;
 
 use App\Repository\AppointmentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AppointmentRepository::class)]
@@ -45,12 +47,16 @@ class Appointment
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $refusalReason = null;
 
+    #[ORM\OneToMany(mappedBy: 'appointment', targetEntity: Payment::class)]
+    private Collection $payments;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->payments = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -72,4 +78,27 @@ class Appointment
     public function setBudget(?float $v): self { $this->budget = $v; return $this; }
     public function getRefusalReason(): ?string { return $this->refusalReason; }
     public function setRefusalReason(?string $v): self { $this->refusalReason = $v; return $this; }
+    
+    public function getPayments(): Collection { return $this->payments; }
+    
+    public function addPayment(Payment $payment): self {
+        if (!$this->payments->contains($payment)) {
+            $this->payments->add($payment);
+            $payment->setAppointment($this);
+        }
+        return $this;
+    }
+    
+    public function removePayment(Payment $payment): self {
+        if ($this->payments->removeElement($payment)) {
+            if ($payment->getAppointment() === $this) {
+                $payment->setAppointment(null);
+            }
+        }
+        return $this;
+    }
+    
+    public function getLatestPayment(): ?Payment {
+        return $this->payments->last() ?: null;
+    }
 }

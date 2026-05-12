@@ -112,6 +112,9 @@ class ReviewController extends AbstractController
         $reviews = $em->getRepository(Review::class)->findBy(['provider' => $provider]);
         if (count($reviews) === 0) return;
         $avg = array_sum(array_map(fn($r) => $r->getRating(), $reviews)) / count($reviews);
+        
+        $provider->setAverageRating(round($avg, 2));
+        
         // Mettre à jour dans les services du prestataire
         $services = $em->getRepository(\App\Entity\Service::class)->findBy(['provider' => $provider]);
         foreach ($services as $service) {
