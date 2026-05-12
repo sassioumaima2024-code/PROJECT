@@ -13,8 +13,9 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
-  // Add empty turbopack config to silence the error and allow webpack to work
-  turbopack: {},
+  turbopack: {
+    root: '.',
+  },
 };
 
 export default nextConfig;

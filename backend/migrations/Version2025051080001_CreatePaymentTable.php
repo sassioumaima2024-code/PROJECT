@@ -35,7 +35,7 @@ final class Version2025051080001_CreatePaymentTable extends AbstractMigration
             PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
-        $this->addSql('ALTER TABLE payment ADD CONSTRAINT FK_PAYMENT_APPOINTMENT FOREIGN KEY (appointment_id) REFERENCES appointments (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE payment ADD CONSTRAINT FK_PAYMENT_APPOINTMENT FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE');
     }
 
     public function down(Schema $schema): void

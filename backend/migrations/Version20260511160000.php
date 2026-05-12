@@ -15,16 +15,14 @@ final class Version20260511160000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // users.governorate_id (nullable)
-        $this->addSql('ALTER TABLE `user` ADD governorate_id INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE `user` ADD CONSTRAINT FK_user_governorate FOREIGN KEY (governorate_id) REFERENCES governorates(id) ON DELETE SET NULL');
+        // columns already exist from failed previous run
+        // $this->addSql('ALTER TABLE `user` ADD governorate_id INT DEFAULT NULL');
+        $this->addSql('ALTER TABLE `user` ADD CONSTRAINT FK_user_governorate FOREIGN KEY (governorate_id) REFERENCES governorate(id) ON DELETE SET NULL');
 
-        // service.category_id (not null)
-        $this->addSql('ALTER TABLE service ADD category_id INT NOT NULL');
-        $this->addSql('ALTER TABLE service ADD CONSTRAINT FK_service_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT');
+        // $this->addSql('ALTER TABLE service ADD category_id INT NOT NULL');
+        $this->addSql('ALTER TABLE service ADD CONSTRAINT FK_service_category FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE RESTRICT');
 
-        // appointment.is_urgent (default 0)
-        $this->addSql('ALTER TABLE appointment ADD is_urgent TINYINT(1) NOT NULL DEFAULT 0');
+        // $this->addSql('ALTER TABLE appointment ADD is_urgent TINYINT(1) NOT NULL DEFAULT 0');
 
         // add indexes for performance
         $this->addSql('CREATE INDEX IDX_user_governorate ON `user` (governorate_id)');

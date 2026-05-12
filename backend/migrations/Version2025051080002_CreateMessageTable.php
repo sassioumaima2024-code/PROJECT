@@ -37,9 +37,9 @@ final class Version2025051080002_CreateMessageTable extends AbstractMigration
             PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
-        $this->addSql('ALTER TABLE message ADD CONSTRAINT FK_MESSAGE_SENDER FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE');
-        $this->addSql('ALTER TABLE message ADD CONSTRAINT FK_MESSAGE_RECIPIENT FOREIGN KEY (recipient_id) REFERENCES users (id) ON DELETE CASCADE');
-        $this->addSql('ALTER TABLE message ADD CONSTRAINT FK_MESSAGE_APPOINTMENT FOREIGN KEY (appointment_id) REFERENCES appointments (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE message ADD CONSTRAINT FK_MESSAGE_SENDER FOREIGN KEY (sender_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE message ADD CONSTRAINT FK_MESSAGE_RECIPIENT FOREIGN KEY (recipient_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE message ADD CONSTRAINT FK_MESSAGE_APPOINTMENT FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE SET NULL');
     }
 
     public function down(Schema $schema): void

@@ -1,44 +1,32 @@
 "use client";
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
+import { apiGet, apiPatch } from '../../../lib/api';
+import AddUserModal from '../../../components/modals/AddUserModal';
 
 export default function ClientsPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    fetch('http://127.0.0.1:8000/api/admin/users', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setUsers(data.filter((u: any) => u.role === 'client'));
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+    fetchData();
   }, []);
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const fetchData = async () => {
+    setLoading(true);
+    const data = await apiGet('/admin/users');
+    if (Array.isArray(data)) {
+      setUsers(data.filter((u: any) => u.role === 'client'));
+    }
+    setLoading(false);
+  };
 
   const toggleUserStatus = async (id: number) => {
-    const token = localStorage.getItem('admin_token');
-    try {
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/users/${id}/toggle`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(users.map(u => u.id === id ? { ...u, is_active: data.is_active } : u));
-      }
-    } catch (err) {
-      console.error(err);
+    const data = await apiPatch(`/admin/users/${id}/toggle`, {});
+    if (!data.error) {
+      setUsers(users.map(u => u.id === id ? { ...u, is_active: !u.is_active } : u));
     }
   };
 
@@ -57,7 +45,22 @@ export default function ClientsPage() {
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">Gestion des Clients</h1>
           <p className="text-slate-400 font-medium mt-1">Consultez et gérez la liste des utilisateurs du service.</p>
         </div>
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="px-8 py-4 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-100 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"></path></svg>
+          Ajouter un Client
+        </button>
       </div>
+
+      {showAddModal && (
+        <AddUserModal 
+          role="client" 
+          onClose={() => setShowAddModal(false)} 
+          onSuccess={fetchData} 
+        />
+      )}
 
       <div className="premium-card overflow-hidden">
         <table className="w-full text-left border-collapse">

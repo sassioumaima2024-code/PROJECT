@@ -38,6 +38,7 @@ class AdminController extends AbstractController
                 'role'      => $user->getRole(),
                 'phone'     => $user->getPhone(),
                 'is_active' => $user->isActive(),
+                'is_verified' => $user->isVerified(),
             ];
         }, $users);
 
@@ -61,10 +62,85 @@ class AdminController extends AbstractController
             'is_active' => $user->isActive(),
         ]);
     }
+
+    // PATCH /api/admin/providers/{id}/validate — valider un compte prestataire
+    #[Route('/providers/{id}/validate', methods: ['PATCH'])]
+    public function validateProvider(int $id, UserRepository $repo, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $repo->find($id);
+        if (!$user || $user->getRole() !== 'prestataire') {
+            return $this->json(['error' => 'Prestataire introuvable'], 404);
+        }
+
+        $user->setIsVerified(true);
+        $em->flush();
+
+        return $this->json([
+            'id' => $user->getId(),
+            'is_verified' => $user->isVerified(),
+        ]);
+    }
+
+    // POST /api/admin/users — créer un utilisateur (client ou prestataire)
+    #[Route('/users', methods: ['POST'])]
+    public function createUser(Request $req, EntityManagerInterface $em, \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $hasher): JsonResponse
+    {
+        $data = json_decode($req->getContent(), true);
+        
+        $user = new User();
+        $user->setEmail($data['email']);
+        $user->setRole($data['role'] ?? 'client');
+        $user->setNomCommercial($data['name'] ?? null);
+        $user->setPhone($data['phone'] ?? null);
+        $user->setIsActive(true);
+        $user->setIsVerified($data['role'] === 'prestataire' ? false : true);
+        
+        $password = $data['password'] ?? 'password123';
+        $user->setPassword($hasher->hashPassword($user, $password));
+        
+        $em->persist($user);
+        $em->flush();
+        
+        return $this->json(['message' => 'Utilisateur créé', 'id' => $user->getId()]);
+    }
+    // GET /api/admin/providers/{id} — détail complet d'un prestataire
+    #[Route('/providers/{id}', methods: ['GET'])]
+    public function getProviderDetails(int $id, UserRepository $repo, ServiceRepository $sr): JsonResponse
+    {
+        $user = $repo->find($id);
+        if (!$user || $user->getRole() !== 'prestataire') {
+            return $this->json(['error' => 'Prestataire introuvable'], 404);
+        }
+
+        $services = $sr->findBy(['provider' => $user]);
+        $servicesData = array_map(function($s) {
+            return [
+                'id' => $s->getId(),
+                'title' => $s->getTitle(),
+                'category' => $s->getCategory()?->getName(),
+                'price_min' => $s->getPriceMin(),
+                'price_max' => $s->getPriceMax(),
+                'is_active' => $s->isActive()
+            ];
+        }, $services);
+
+        return $this->json([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'name' => $user->getNomCommercial(),
+            'phone' => $user->getPhone(),
+            'is_active' => $user->isActive(),
+            'is_verified' => $user->isVerified(),
+            'governorate' => $user->getGovernorate()?->getNameFr(),
+            'services' => $servicesData,
+            'created_at' => $user->getCreatedAt()?->format('Y-m-d'),
+        ]);
+    }
+
     // GET /api/admin/services — liste tous les services
-#[Route('/services', methods: ['GET'])]
-public function getServices(ServiceRepository $repo): JsonResponse
-{
+    #[Route('/services', methods: ['GET'])]
+    public function getServices(ServiceRepository $repo): JsonResponse
+    {
     $services = $repo->findAll();
     $data = array_map(function($service) {
         $categoryData = null;
@@ -290,6 +366,23 @@ public function getService(int $id, ServiceRepository $repo): JsonResponse
         $em->flush();
         
         return $this->json(['message' => 'Catégorie supprimée']);
+    }
+
+    // PATCH /api/admin/categories/{id} — Modifier une catégorie
+    #[Route('/categories/{id}', methods: ['PATCH'])]
+    public function updateCategory(int $id, Request $req, CategoryRepository $repo, EntityManagerInterface $em): JsonResponse
+    {
+        $cat = $repo->find($id);
+        if (!$cat) return $this->json(['error' => 'Catégorie introuvable'], 404);
+
+        $data = json_decode($req->getContent(), true);
+        if (isset($data['name'])) $cat->setName($data['name']);
+        if (isset($data['description'])) $cat->setDescription($data['description']);
+        if (isset($data['icon'])) $cat->setIcon($data['icon']);
+        
+        $em->flush();
+        
+        return $this->json(['message' => 'Catégorie mise à jour']);
     }
 
     // GET /api/admin/reviews — Liste tous les avis
