@@ -19,8 +19,9 @@ class Service
     #[ORM\Column(length: 100)]
     private string $title;
 
-    #[ORM\Column(length: 50)]
-    private string $category;
+    #[ORM\ManyToOne(targetEntity: Category::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private Category $category;
 
     #[ORM\Column(type: 'decimal', precision: 8, scale: 2)]
     private float $priceMin;
@@ -59,8 +60,8 @@ class Service
     public function setProvider(User $p): self { $this->provider = $p; return $this; }
     public function getTitle(): string { return $this->title; }
     public function setTitle(string $t): self { $this->title = $t; return $this; }
-    public function getCategory(): string { return $this->category; }
-    public function setCategory(string $c): self { $this->category = $c; return $this; }
+    public function getCategory(): Category { return $this->category; }
+    public function setCategory(Category $c): self { $this->category = $c; return $this; }
     public function getPriceMin(): float { return $this->priceMin; }
     public function setPriceMin(float $v): self { $this->priceMin = $v; return $this; }
     public function getPriceMax(): float { return $this->priceMax; }
@@ -77,4 +78,5 @@ class Service
     public function setIsActive(bool $v): self { $this->isActive = $v; return $this; }
     public function getAverageRating(): ?float { return $this->averageRating; }
     public function setAverageRating(?float $v): self { $this->averageRating = $v; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
 }

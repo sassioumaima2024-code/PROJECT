@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Entity\Service;
 use App\Repository\ServiceRepository;
+use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,7 +19,10 @@ class ServiceController extends AbstractController
         return [
             'id' => $service->getId(),
             'title' => $service->getTitle(),
-            'category' => $service->getCategory(),
+            'category' => [
+                'id' => $service->getCategory()->getId(),
+                'name' => $service->getCategory()->getName(),
+            ],
             'priceMin' => $service->getPriceMin(),
             'priceMax' => $service->getPriceMax(),
             'experience' => $service->getExperience(),
@@ -60,13 +64,13 @@ class ServiceController extends AbstractController
 
     #[Route('/provider/services', methods: ['POST'])]
     #[IsGranted('ROLE_PRESTATAIRE')]
-    public function create(Request $req, EntityManagerInterface $em): JsonResponse
+    public function create(Request $req, EntityManagerInterface $em, CategoryRepository $cr): JsonResponse
     {
         $data = json_decode($req->getContent(), true);
         $service = new Service();
         $service->setProvider($this->getUser());
         $service->setTitle($data['title']);
-        $service->setCategory($data['category']);
+        $service->setCategory($cr->find($data['category_id'] ?? $data['category']));
         $service->setPriceMin($data['price_min']);
         $service->setPriceMax($data['price_max']);
         $service->setExperience($data['experience'] ?? 0);
@@ -81,7 +85,7 @@ class ServiceController extends AbstractController
 
     #[Route('/provider/services/{id}', methods: ['PUT'])]
     #[IsGranted('ROLE_PRESTATAIRE')]
-    public function update(Service $service, Request $req, EntityManagerInterface $em): JsonResponse
+    public function update(Service $service, Request $req, EntityManagerInterface $em, CategoryRepository $cr): JsonResponse
     {
         if ($service->getProvider() !== $this->getUser()) {
             return $this->json(['error' => 'Accès refusé'], 403);
@@ -90,7 +94,7 @@ class ServiceController extends AbstractController
         if (isset($data['title']))       $service->setTitle($data['title']);
         if (isset($data['price_min']))   $service->setPriceMin($data['price_min']);
         if (isset($data['price_max']))   $service->setPriceMax($data['price_max']);
-        if (isset($data['category']))    $service->setCategory($data['category']);
+        if (isset($data['category_id'])) $service->setCategory($cr->find($data['category_id']));
         if (isset($data['experience']))  $service->setExperience((int) $data['experience']);
         if (isset($data['description'])) $service->setDescription($data['description']);
         if (isset($data['governorates'])) $service->setGovernorates($data['governorates']);

@@ -45,6 +45,9 @@ class Appointment
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $refusalReason = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $isUrgent = false;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
@@ -72,4 +75,8 @@ class Appointment
     public function setBudget(?float $v): self { $this->budget = $v; return $this; }
     public function getRefusalReason(): ?string { return $this->refusalReason; }
     public function setRefusalReason(?string $v): self { $this->refusalReason = $v; return $this; }
+
+    public function isUrgent(): bool { return $this->isUrgent; }
+    public function setIsUrgent(bool $v): self { $this->isUrgent = $v; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
 }

@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Repository\GovernorateRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,6 +21,7 @@ class AuthController extends AbstractController
         Request $req,
         EntityManagerInterface $em,
         UserRepository $ur,
+        GovernorateRepository $gr,
         UserPasswordHasherInterface $hasher
     ): JsonResponse {
         $data = $this->requestData($req);
@@ -38,7 +40,11 @@ class AuthController extends AbstractController
         $user->setPhone($data['phone'] ?? null);
         $user->setNomCommercial($data['nom_commercial'] ?? null);
         $user->setProfilePhoto($this->storeUploadedFile($req->files->get('profile_photo'), 'profiles') ?? ($data['profile_photo'] ?? null));
-        $user->setGovernorates($data['gouvernorats'] ?? []);
+        
+        if (!empty($data['governorate_id'])) {
+            $user->setGovernorate($gr->find($data['governorate_id']));
+        }
+
         $user->setCategories($data['categories'] ?? []);
         $user->setPortfolio($this->storeUploadedFiles($req->files->all('portfolio'), 'portfolio'));
         $user->setDocuments(array_filter([

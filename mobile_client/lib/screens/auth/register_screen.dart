@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../config/app_theme.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -50,11 +51,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF0F5),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF9B1D54),
-        title: const Text('Créer un compte', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Créer un compte'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -70,7 +69,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF9B1D54),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
 
@@ -78,7 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const Text(
                   'Créez votre compte client',
-                  style: TextStyle(color: Color(0xFFC2185B)),
+                  style: TextStyle(color: AppTheme.secondaryColor),
                 ),
 
                 const SizedBox(height: 32),
@@ -127,25 +126,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 SizedBox(
                   width: double.infinity,
-                  height: 52,
+                  height: 56,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _register,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF9B1D54),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "S'inscrire",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                        : const Text("S'inscrire"),
                   ),
                 ),
               ],

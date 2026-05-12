@@ -20,9 +20,10 @@ security:
             jwt: ~
 
     access_control:
-        - { path: ^/api/(register|login|verify-otp|forgot-password|reset-password)$, roles: PUBLIC_ACCESS }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    - { path: ^/api/register, roles: PUBLIC_ACCESS }
+    - { path: ^/api/categories, roles: PUBLIC_ACCESS }
+    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 when@test:
     security:
         password_hashers:

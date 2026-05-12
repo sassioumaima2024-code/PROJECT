@@ -5,6 +5,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Governorate;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -51,8 +52,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'float', nullable: true)]
     private ?float $longitude = null;
 
-    #[ORM\Column(type: 'json')]
-    private array $governorates = [];
+    #[ORM\ManyToOne(targetEntity: Governorate::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Governorate $governorate = null;
 
     #[ORM\Column(type: 'json')]
     private array $categories = [];
@@ -127,6 +129,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getLongitude(): ?float { return $this->longitude; }
     public function setLongitude(?float $v): self { $this->longitude = $v; return $this; }
 
+    public function getGovernorate(): ?Governorate { return $this->governorate; }
+    public function setGovernorate(?Governorate $v): self { $this->governorate = $v; return $this; }
+
     public function getGovernorates(): array { return $this->governorates; }
     public function setGovernorates(array $v): self { $this->governorates = $v; return $this; }
 
@@ -147,4 +152,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function isVerified(): bool { return $this->isVerified; }
     public function setIsVerified(bool $v): self { $this->isVerified = $v; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
 }

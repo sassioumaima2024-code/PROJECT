@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/custom_text_field.dart';
 import 'register_screen.dart';
+import 'register_screen.dart';
 import '../home/home_screen.dart';
+import '../../config/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -47,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF0F5),
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -63,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9B1D54),
+                    color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(25),
                   ),
                   child: const Center(
@@ -80,12 +82,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 16),
 
-                const Text(
+                Text(
                   'SERVICY',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF9B1D54),
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                    color: AppTheme.primaryColor,
                     letterSpacing: 3,
                   ),
                 ),
@@ -94,22 +94,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Votre service à la demande',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFFC2185B),
+                    color: AppTheme.secondaryColor,
                   ),
                 ),
 
                 const SizedBox(height: 40),
 
                 // Titre
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Connexion',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2D1B2E),
-                    ),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                 ),
 
@@ -153,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {},
                     child: const Text(
                       'Mot de passe oublié ?',
-                      style: TextStyle(color: Color(0xFF9B1D54)),
+                      style: TextStyle(color: AppTheme.primaryColor),
                     ),
                   ),
                 ),
@@ -163,25 +159,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Bouton connexion
                 SizedBox(
                   width: double.infinity,
-                  height: 52,
+                  height: 56,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _login,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF9B1D54),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Se connecter',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                        : const Text('Se connecter'),
                   ),
                 ),
 

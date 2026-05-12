@@ -37,11 +37,11 @@ export default function LoginPage() {
     <div className="min-h-screen bg-pink-50 flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-rose-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-4xl font-bold">S</span>
+          <div className="w-24 h-24 bg-gradient-to-br from-[#9B1D54] to-[#C2185B] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-rose-200">
+            <span className="text-white text-5xl font-black">S</span>
           </div>
-          <h1 className="text-2xl font-bold text-rose-800 tracking-widest">SERVICY</h1>
-          <p className="text-rose-400 text-sm">Dashboard Administrateur</p>
+          <h1 className="text-3xl font-black text-slate-800 tracking-tighter">SERVICY</h1>
+          <p className="text-rose-400 text-xs font-bold uppercase tracking-widest mt-2">Admin Dashboard</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -78,9 +78,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-rose-800 text-white rounded-xl py-3 font-bold text-lg hover:bg-rose-900 transition disabled:opacity-50"
+            className="w-full bg-[#9B1D54] text-white rounded-2xl py-4 font-black text-sm uppercase tracking-widest hover:bg-[#C2185B] transition-all shadow-xl shadow-rose-100 disabled:opacity-50"
           >
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {loading ? 'Authentification...' : 'Accéder au Dashboard'}
           </button>
         </form>
       </div>

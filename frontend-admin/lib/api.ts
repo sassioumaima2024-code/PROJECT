@@ -11,10 +11,29 @@ export async function apiLogin(email: string, password: string) {
 
 export async function apiGet(endpoint: string) {
   const token = localStorage.getItem('admin_token');
-  const res = await fetch(`${API_URL}${endpoint}`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-  });
-  return res.json();
+  try {
+    const res = await fetch(`${API_URL}${endpoint}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      if (res.status === 401) {
+        localStorage.removeItem('admin_token');
+        window.location.href = '/login';
+        return { error: 'Session expirée' };
+      }
+      const text = await res.text();
+      return { error: `Erreur ${res.status}: ${text.substring(0, 50)}...` };
+    }
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      return await res.json();
+    } else {
+      const text = await res.text();
+      return { error: `Réponse non-JSON: ${text.substring(0, 50)}...` };
+    }
+  } catch (err: any) {
+    return { error: err.message };
+  }
 }
 
 export async function apiPatch(endpoint: string, data: object) {
